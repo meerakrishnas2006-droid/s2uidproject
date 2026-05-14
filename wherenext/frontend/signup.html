@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up | Where Next</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
+</head>
+<body>
+<div class="login-page">
+  <!-- Left: Visual -->
+  <div class="login-visual">
+    <img src="https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1200&q=80" alt="Hot air balloons">
+    <div class="login-visual-overlay"></div>
+    <div class="login-visual-text">
+      <h2>Discover the world,<br>your way.</h2>
+      <p>Create your free account and start planning unforgettable trips in minutes.</p>
+      <div class="signup-perks">
+        <div class="perk"><i class="ri-check-double-line"></i> Personalized itineraries</div>
+        <div class="perk"><i class="ri-check-double-line"></i> Hotel recommendations &amp; booking links</div>
+        <div class="perk"><i class="ri-check-double-line"></i> Budget-smart travel plans</div>
+        <div class="perk"><i class="ri-check-double-line"></i> Save &amp; revisit your trips</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Signup Form -->
+  <div class="login-form-side">
+    <div class="login-card">
+      <a href="index.html" class="logo" style="color:var(--bg);margin-bottom:32px;display:inline-block;font-size:1.6rem">where<span>next</span></a>
+      <h1>Create account</h1>
+      <p class="subtitle">Join 12,000+ travelers. It's free forever.</p>
+
+      <div id="signupError" class="form-error" style="display:none"></div>
+      <div id="signupSuccess" class="form-success" style="display:none">
+        <i class="ri-check-line"></i> Account created! Redirecting…
+      </div>
+
+      <form id="signupForm">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" placeholder="Jane Smith" required autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-with-icon">
+            <input type="password" id="password" placeholder="Min. 6 characters" required autocomplete="new-password" minlength="6">
+            <button type="button" class="input-eye" id="togglePwd"><i class="ri-eye-off-line"></i></button>
+          </div>
+          <div class="password-strength" id="pwdStrength">
+            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+            <span id="strengthLabel"></span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <div class="input-with-icon">
+            <input type="password" id="confirmPassword" placeholder="Re-enter password" required autocomplete="new-password">
+            <button type="button" class="input-eye" id="toggleConfirm"><i class="ri-eye-off-line"></i></button>
+          </div>
+        </div>
+
+        <label class="terms-check">
+          <input type="checkbox" id="agreeTerms" required>
+          <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+        </label>
+
+        <button type="submit" class="login-btn" id="signupBtn">
+          <span id="signupBtnText">Create Account</span>
+          <i class="ri-loader-4-line spin" id="signupSpinner" style="display:none"></i>
+        </button>
+      </form>
+
+      <div class="divider">or sign up with</div>
+      <div class="social-logins">
+        <button class="social-btn" type="button"><i class="ri-google-fill"></i> Google</button>
+        <button class="social-btn" type="button"><i class="ri-apple-fill"></i> Apple</button>
+      </div>
+      <div class="login-footer">Already have an account? <a href="login.html">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  if (isLoggedIn()) window.location.href = isAdmin() ? 'admin.html' : 'plan.html';
+
+  // Password visibility toggles
+  function toggleVisibility(inputId, btnId) {
+    document.getElementById(btnId).addEventListener('click', function () {
+      const inp = document.getElementById(inputId);
+      const icon = this.querySelector('i');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      icon.className = inp.type === 'password' ? 'ri-eye-off-line' : 'ri-eye-line';
+    });
+  }
+  toggleVisibility('password', 'togglePwd');
+  toggleVisibility('confirmPassword', 'toggleConfirm');
+
+  // Password strength meter
+  document.getElementById('password').addEventListener('input', function () {
+    const val = this.value;
+    const fill = document.getElementById('strengthFill');
+    const label = document.getElementById('strengthLabel');
+    let strength = 0;
+    if (val.length >= 6) strength++;
+    if (val.length >= 10) strength++;
+    if (/[A-Z]/.test(val)) strength++;
+    if (/[0-9]/.test(val)) strength++;
+    if (/[^A-Za-z0-9]/.test(val)) strength++;
+    const pct = (strength / 5) * 100;
+    fill.style.width = pct + '%';
+    const colors = ['', '#ef4444', '#f97316', '#eab308', '#22c55e', '#16a34a'];
+    const labels = ['', 'Very weak', 'Weak', 'Fair', 'Strong', 'Very strong'];
+    fill.style.background = colors[strength] || '#ef4444';
+    label.textContent = val.length ? labels[strength] || 'Very weak' : '';
+    label.style.color = colors[strength] || '#ef4444';
+  });
+
+  // Signup form submit
+  document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    const errEl = document.getElementById('signupError');
+    const successEl = document.getElementById('signupSuccess');
+    const btn = document.getElementById('signupBtn');
+    const spinner = document.getElementById('signupSpinner');
+    const btnText = document.getElementById('signupBtnText');
+
+    errEl.style.display = 'none';
+
+    if (password !== confirm) {
+      errEl.textContent = 'Passwords do not match.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true; btnText.style.display = 'none'; spinner.style.display = 'inline';
+    try {
+      const data = await Auth.register({ name, email, password });
+      setAuth(data.token, data.user);
+      successEl.style.display = 'block';
+      setTimeout(() => { window.location.href = 'plan.html'; }, 1200);
+    } catch (err) {
+      errEl.textContent = err.message; errEl.style.display = 'block';
+    } finally {
+      btn.disabled = false; btnText.style.display = 'inline'; spinner.style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>

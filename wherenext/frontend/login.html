@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In | Where Next</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
+</head>
+<body>
+<div class="login-page">
+  <div class="login-visual">
+    <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&q=80" alt="Mountain sunrise">
+    <div class="login-visual-overlay"></div>
+    <div class="login-visual-text">
+      <h2>Your next adventure<br>is one click away.</h2>
+      <p>Join 12,000+ travelers exploring the world with Where Next.</p>
+    </div>
+  </div>
+  <div class="login-form-side">
+    <div class="login-card">
+      <a href="index.html" class="logo" style="color:var(--bg);margin-bottom:40px;display:inline-block;font-size:1.6rem">where<span>next</span></a>
+      <h1>Welcome back</h1>
+      <p class="subtitle">Sign in to continue planning your trips.</p>
+      <div id="loginError" class="form-error" style="display:none"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-with-icon">
+            <input type="password" id="password" placeholder="••••••••" required>
+            <button type="button" class="input-eye" id="togglePwd"><i class="ri-eye-off-line"></i></button>
+          </div>
+        </div>
+        <div class="form-row">
+          <label><input type="checkbox"> Remember me</label>
+          <a href="#">Forgot password?</a>
+        </div>
+        <button type="submit" class="login-btn" id="loginBtn">
+          <span id="loginBtnText">Sign In</span>
+          <i class="ri-loader-4-line spin" id="loginSpinner" style="display:none"></i>
+        </button>
+      </form>
+      <div class="divider">or continue with</div>
+      <div class="social-logins">
+        <button class="social-btn" type="button"><i class="ri-google-fill"></i> Google</button>
+        <button class="social-btn" type="button"><i class="ri-apple-fill"></i> Apple</button>
+      </div>
+      <div class="login-footer">Don't have an account? <a href="signup.html">Sign up free</a></div>
+    </div>
+  </div>
+</div>
+<script src="js/api.js"></script>
+<script>
+  if (isLoggedIn()) window.location.href = isAdmin() ? 'admin.html' : 'plan.html';
+  document.getElementById('togglePwd').addEventListener('click', function () {
+    const inp = document.getElementById('password');
+    const icon = this.querySelector('i');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    icon.className = inp.type === 'password' ? 'ri-eye-off-line' : 'ri-eye-line';
+  });
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+    const spinner = document.getElementById('loginSpinner');
+    const btnText = document.getElementById('loginBtnText');
+    errEl.style.display = 'none';
+    btn.disabled = true; btnText.style.display = 'none'; spinner.style.display = 'inline';
+    try {
+      const data = await Auth.login({ email: document.getElementById('email').value.trim(), password: document.getElementById('password').value });
+      setAuth(data.token, data.user);
+      window.location.href = data.user.role === 'admin' ? 'admin.html' : 'plan.html';
+    } catch (err) {
+      errEl.textContent = err.message; errEl.style.display = 'block';
+    } finally {
+      btn.disabled = false; btnText.style.display = 'inline'; spinner.style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>

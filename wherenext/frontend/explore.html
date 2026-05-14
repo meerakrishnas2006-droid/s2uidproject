@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore curated travel packages to the world's most stunning destinations.">
+  <title>Explore Packages | Where Next</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
+</head>
+<body>
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="logo">where<span>next</span></a>
+    <ul class="nav-menu" id="navMenu">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="explore.html" class="active">Explore</a></li>
+      <li><a href="plan.html">Plan Trip</a></li>
+    </ul>
+    <div class="nav-right" id="navRight">
+      <a href="login.html" class="nav-cta">Sign In</a>
+      <button class="mobile-toggle" id="mobileToggle"><i class="ri-menu-line"></i></button>
+    </div>
+  </div>
+</nav>
+
+<section class="explore-hero">
+  <img class="explore-hero-bg" src="https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1920&q=80" alt="Travel">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-label">Find Your Perfect Trip</p>
+    <h1>Explore Packages</h1>
+    <form class="search-bar" onsubmit="event.preventDefault();filterBySearch()">
+      <input type="text" id="searchInput" placeholder="Search destinations, packages…">
+      <button class="btn btn-primary" type="submit"><i class="ri-search-line"></i> Search</button>
+    </form>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="filters" data-reveal>
+      <button class="filter-btn active" onclick="filterPkgs('all',this)">All</button>
+      <button class="filter-btn" onclick="filterPkgs('Beach',this)">Beach</button>
+      <button class="filter-btn" onclick="filterPkgs('Mountain',this)">Mountain</button>
+      <button class="filter-btn" onclick="filterPkgs('City',this)">City</button>
+      <button class="filter-btn" onclick="filterPkgs('Adventure',this)">Adventure</button>
+      <button class="filter-btn" onclick="filterPkgs('Luxury',this)">Luxury</button>
+    </div>
+    <div class="explore-grid" id="pkgGrid" data-stagger>
+      <div class="pkg-card" data-cat="Luxury" style="background:#111113;border:1px solid rgba(255,255,255,.08)"><div class="pkg-card-img"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80" alt="Maldives" loading="lazy"><div class="pkg-badge">Best Seller</div></div><div class="pkg-card-body"><h3>Maldives Luxury Escape</h3><div class="pkg-meta"><span><i class="ri-time-line"></i>5 Days</span><span><i class="ri-map-pin-line"></i>Maldives</span><span><i class="ri-star-fill"></i>4.9</span></div><div class="pkg-price"><span class="amount">$2,499</span><span class="per">/person</span></div><a href="plan.html" class="btn btn-primary btn-sm">Plan This <i class="ri-arrow-right-s-line"></i></a></div></div>
+      <div class="pkg-card" data-cat="Mountain" style="background:#111113;border:1px solid rgba(255,255,255,.08)"><div class="pkg-card-img"><img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=80" alt="Alps" loading="lazy"><div class="pkg-badge">Popular</div></div><div class="pkg-card-body"><h3>Swiss Alps Adventure</h3><div class="pkg-meta"><span><i class="ri-time-line"></i>7 Days</span><span><i class="ri-map-pin-line"></i>Switzerland</span><span><i class="ri-star-fill"></i>4.8</span></div><div class="pkg-price"><span class="amount">$3,199</span><span class="per">/person</span></div><a href="plan.html" class="btn btn-primary btn-sm">Plan This <i class="ri-arrow-right-s-line"></i></a></div></div>
+      <div class="pkg-card" data-cat="Beach" style="background:#111113;border:1px solid rgba(255,255,255,.08)"><div class="pkg-card-img"><img src="https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=600&q=80" alt="Greece" loading="lazy"><div class="pkg-badge">New</div></div><div class="pkg-card-body"><h3>Greek Islands Tour</h3><div class="pkg-meta"><span><i class="ri-time-line"></i>6 Days</span><span><i class="ri-map-pin-line"></i>Greece</span><span><i class="ri-star-fill"></i>4.7</span></div><div class="pkg-price"><span class="amount">$1,899</span><span class="per">/person</span></div><a href="plan.html" class="btn btn-primary btn-sm">Plan This <i class="ri-arrow-right-s-line"></i></a></div></div>
+      <div class="pkg-card" data-cat="City" style="background:#111113;border:1px solid rgba(255,255,255,.08)"><div class="pkg-card-img"><img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=80" alt="Paris" loading="lazy"></div><div class="pkg-card-body"><h3>Romantic Paris Getaway</h3><div class="pkg-meta"><span><i class="ri-time-line"></i>4 Days</span><span><i class="ri-map-pin-line"></i>France</span><span><i class="ri-star-fill"></i>4.9</span></div><div class="pkg-price"><span class="amount">$1,599</span><span class="per">/person</span></div><a href="plan.html" class="btn btn-primary btn-sm">Plan This <i class="ri-arrow-right-s-line"></i></a></div></div>
+      <div class="pkg-card" data-cat="Beach" style="background:#111113;border:1px solid rgba(255,255,255,.08)"><div class="pkg-card-img"><img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&q=80" alt="Bali" loading="lazy"><div class="pkg-badge">Trending</div></div><div class="pkg-card-body"><h3>Bali Cultural Journey</h3><div class="pkg-meta"><span><i class="ri-time-line"></i>8 Days</span><span><i class="ri-map-pin-line"></i>Indonesia</span><span><i class="ri-star-fill"></i>4.8</span></div><div class="pkg-price"><span class="amount">$1,299</span><span class="per">/person</span></div><a href="plan.html" class="btn btn-primary btn-sm">Plan This <i class="ri-arrow-right-s-line"></i></a></div></div>
+      <div class="pkg-card" data-cat="Adventure" style="background:#111113;border:1px solid rgba(255,255,255,.08)"><div class="pkg-card-img"><img src="https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=600&q=80" alt="Safari" loading="lazy"></div><div class="pkg-card-body"><h3>African Safari Expedition</h3><div class="pkg-meta"><span><i class="ri-time-line"></i>10 Days</span><span><i class="ri-map-pin-line"></i>Kenya</span><span><i class="ri-star-fill"></i>4.9</span></div><div class="pkg-price"><span class="amount">$4,299</span><span class="per">/person</span></div><a href="plan.html" class="btn btn-primary btn-sm">Plan This <i class="ri-arrow-right-s-line"></i></a></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-dark">
+  <div class="container">
+    <div class="section-header" data-reveal><div class="section-label">Hot Right Now</div><h2 class="section-title">Trending Destinations</h2></div>
+    <div class="trending-grid" data-stagger>
+      <div class="trending-card"><img src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=600&q=80" alt="Italy" loading="lazy"><div class="trending-card-overlay"></div><div class="trending-card-info"><h3>Amalfi Coast</h3><p>Starting at $1,899</p></div></div>
+      <div class="trending-card"><img src="https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=600&q=80" alt="Venice" loading="lazy"><div class="trending-card-overlay"></div><div class="trending-card-info"><h3>Venice</h3><p>Starting at $1,499</p></div></div>
+      <div class="trending-card"><img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=80" alt="Dubai" loading="lazy"><div class="trending-card-overlay"></div><div class="trending-card-info"><h3>Dubai</h3><p>Starting at $1,299</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-section" data-reveal>
+      <div class="section-label">Ready?</div>
+      <h2>Start Planning Your Dream Trip</h2>
+      <p>Join 12,000+ travelers who've discovered the world with Where Next.</p>
+      <a href="plan.html" class="btn btn-primary">Get Started <i class="ri-arrow-right-line"></i></a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><a href="index.html" class="logo">where<span>next</span></a><p>Your trusted partner for extraordinary travel experiences.</p><div class="footer-social"><a href="#"><i class="ri-instagram-line"></i></a><a href="#"><i class="ri-twitter-x-line"></i></a><a href="#"><i class="ri-facebook-fill"></i></a></div></div>
+      <div><h4>Company</h4><ul class="footer-links"><li><a href="#">About Us</a></li><li><a href="#">Careers</a></li><li><a href="#">Blog</a></li></ul></div>
+      <div><h4>Support</h4><ul class="footer-links"><li><a href="#">Help Center</a></li><li><a href="#">Contact</a></li></ul></div>
+      <div><h4>Legal</h4><ul class="footer-links"><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li></ul></div>
+    </div>
+  </div>
+  <div class="footer-bottom"><div class="container">© 2026 Where Next. All rights reserved.</div></div>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+syncNav();
+document.getElementById('mobileToggle')?.addEventListener('click',function(){
+  document.getElementById('navMenu').classList.toggle('open');
+});
+function filterPkgs(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.pkg-card').forEach(card => {
+    card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
+  });
+}
+function filterBySearch() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.pkg-card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

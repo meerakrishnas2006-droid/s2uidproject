@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Trips | Where Next</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
+</head>
+<body class="dark-bg">
+
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="logo">where<span>next</span></a>
+    <ul class="nav-menu">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="plan.html">Plan Trip</a></li>
+      <li><a href="dashboard.html" class="active">My Trips</a></li>
+    </ul>
+    <div class="nav-right" id="navRight"></div>
+  </div>
+</nav>
+
+<main class="dashboard-page">
+  <div class="container">
+    <div class="dash-header">
+      <div>
+        <h1>My Travel Plans</h1>
+        <p id="dashSubtitle">Your saved itineraries in one place.</p>
+      </div>
+      <a href="plan.html" class="btn btn-primary"><i class="ri-add-line"></i> New Plan</a>
+    </div>
+
+    <div id="plansLoading" class="loading-state">
+      <i class="ri-loader-4-line spin big-spin"></i><p>Loading your trips…</p>
+    </div>
+    <div id="plansEmpty" class="empty-state" style="display:none">
+      <i class="ri-map-2-line"></i>
+      <h3>No trips yet!</h3>
+      <p>Start planning your first adventure.</p>
+      <a href="plan.html" class="btn btn-primary"><i class="ri-route-line"></i> Plan a Trip</a>
+    </div>
+    <div class="plans-grid" id="plansGrid" style="display:none"></div>
+  </div>
+</main>
+
+<!-- Plan Detail Modal -->
+<div id="planModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closePlanModal()">
+  <div class="modal-box modal-large">
+    <button class="modal-close" onclick="closePlanModal()"><i class="ri-close-line"></i></button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+requireAuth();
+syncNav();
+
+const user = getUser();
+if (user) document.getElementById('dashSubtitle').textContent = `Welcome back, ${user.name.split(' ')[0]}! Here are your saved itineraries.`;
+
+async function loadPlans() {
+  try {
+    const res = await Planner.myPlans();
+    const plans = res.data;
+    document.getElementById('plansLoading').style.display = 'none';
+    if (!plans || plans.length === 0) {
+      document.getElementById('plansEmpty').style.display = 'flex';
+    } else {
+      document.getElementById('plansGrid').style.display = 'grid';
+      renderPlans(plans);
+    }
+  } catch (err) {
+    document.getElementById('plansLoading').innerHTML = `<i class="ri-error-warning-line"></i><p>${err.message}</p>`;
+  }
+}
+
+function renderPlans(plans) {
+  const catIcon = { budget: '💰', mid: '✈️', luxury: '💎' };
+  const grid = document.getElementById('plansGrid');
+  grid.innerHTML = plans.map(p => `
+    <div class="plan-card" onclick="viewPlan('${p._id}')">
+      <div class="plan-card-top">
+        <div class="plan-dest-icon"><i class="ri-map-pin-2-fill"></i></div>
+        <div class="plan-card-meta">
+          <h3>${p.destination}${p.country ? ', ' + p.country : ''}</h3>
+          <div class="plan-tags">
+            <span><i class="ri-calendar-line"></i>${p.days} days</span>
+            <span><i class="ri-group-line"></i>${p.travelers||1} traveler${(p.travelers||1)>1?'s':''}</span>
+            <span>${catIcon[p.budgetCategory]||'✈️'} ${p.budgetCategory||'mid'}</span>
+          </div>
+        </div>
+      </div>
+      <div class="plan-card-body">
+        <div class="plan-stat"><span>Budget</span><strong>$${p.budget.toLocaleString()}</strong></div>
+        <div class="plan-stat"><span>Est. Cost</span><strong>$${(p.totalEstimatedCost||0).toLocaleString()}</strong></div>
+        <div class="plan-stat"><span>Hotels</span><strong>${(p.recommendedHotels||[]).length}</strong></div>
+      </div>
+      <div class="plan-card-footer">
+        <span class="plan-date">${new Date(p.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
+        <button class="plan-delete-btn" onclick="event.stopPropagation();deletePlan('${p._id}',this)" title="Delete plan"><i class="ri-delete-bin-line"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+async function viewPlan(id) {
+  try {
+    const res = await Planner.getPlan(id);
+    const plan = res.data;
+    const catIcon = { budget: '💰', mid: '✈️', luxury: '💎' };
+    document.getElementById('modalContent').innerHTML = `
+      <div class="modal-plan-header">
+        <h2><i class="ri-map-pin-2-fill"></i> ${plan.destination}${plan.country?', '+plan.country:''}</h2>
+        <div class="overview-meta">
+          <span><i class="ri-calendar-line"></i>${plan.days} Days</span>
+          <span><i class="ri-group-line"></i>${plan.travelers||1} Traveler(s)</span>
+          <span>${catIcon[plan.budgetCategory]||'✈️'} ${plan.budgetCategory}</span>
+          <span><i class="ri-money-dollar-circle-line"></i>Budget: $${plan.budget.toLocaleString()}</span>
+          <span class="est-cost"><i class="ri-price-tag-3-line"></i>Est: $${(plan.totalEstimatedCost||0).toLocaleString()}</span>
+        </div>
+      </div>
+      <h3 class="plan-section-title"><i class="ri-calendar-event-line"></i> Itinerary</h3>
+      ${(plan.itinerary||[]).map(day=>`
+        <div class="day-card open">
+          <div class="day-header"><div class="day-num">Day ${day.day}</div><div class="day-title">${day.title}</div></div>
+          <div class="day-body">
+            ${(day.activities||[]).map(a=>`
+              <div class="activity-row">
+                <div class="activity-time">${a.time||''}</div>
+                <div class="activity-dot"></div>
+                <div class="activity-info">
+                  <div class="activity-name">${a.activity}</div>
+                  ${a.location?`<div class="activity-location"><i class="ri-map-pin-line"></i>${a.location}</div>`:''}
+                </div>
+                <div class="activity-cost">${a.cost>0?'$'+a.cost:'Free'}</div>
+              </div>`).join('')}
+          </div>
+        </div>`).join('')}
+      ${plan.recommendedHotels&&plan.recommendedHotels.length?`
+        <h3 class="plan-section-title" style="margin-top:32px"><i class="ri-hotel-line"></i> Hotels</h3>
+        <div class="hotels-grid">
+          ${plan.recommendedHotels.map(h=>`
+            <div class="hotel-card">
+              <div class="hotel-img"><img src="${h.image||'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80'}" alt="${h.name}" loading="lazy"><div class="hotel-stars">${'★'.repeat(h.stars||3)}</div></div>
+              <div class="hotel-body"><h3>${h.name}</h3>
+                <div class="hotel-footer"><div class="hotel-price"><span class="price-amt">$${h.pricePerNight}</span><span>/night</span></div><div class="hotel-rating"><i class="ri-star-fill"></i>${h.rating||4.0}</div></div>
+                ${h.bookingUrl?`<a href="${h.bookingUrl}" target="_blank" rel="noopener" class="btn btn-primary btn-sm hotel-book-btn"><i class="ri-hotel-line"></i> Book Now</a>`:''}
+              </div>
+            </div>`).join('')}
+        </div>`:''}`;
+    document.getElementById('planModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
+function closePlanModal() {
+  document.getElementById('planModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+async function deletePlan(id, btn) {
+  if (!confirm('Delete this travel plan?')) return;
+  try {
+    await Planner.deletePlan(id);
+    btn.closest('.plan-card').remove();
+    showToast('Plan deleted', 'success');
+    const remaining = document.querySelectorAll('.plan-card').length;
+    if (remaining === 0) { document.getElementById('plansGrid').style.display = 'none'; document.getElementById('plansEmpty').style.display = 'flex'; }
+  } catch (err) { showToast(err.message, 'error'); }
+}
+
+loadPlans();
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel | Where Next</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
+</head>
+<body class="dark-bg">
+
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="logo">where<span>next</span></a>
+    <ul class="nav-menu">
+      <li><a href="admin.html" class="active">Admin Panel</a></li>
+      <li><a href="plan.html">Plan Trip</a></li>
+    </ul>
+    <div class="nav-right" id="navRight"></div>
+  </div>
+</nav>
+
+<main class="admin-page">
+  <div class="container">
+    <!-- Stats Row -->
+    <div class="admin-header">
+      <div><h1><i class="ri-shield-user-line"></i> Admin Panel</h1><p>Manage destinations, hotels, and platform data.</p></div>
+      <button class="btn btn-primary" id="addDestBtn" onclick="openAddDestModal()"><i class="ri-add-line"></i> Add Destination</button>
+    </div>
+
+    <div class="admin-stats-row" id="adminStats">
+      <div class="admin-stat-card"><i class="ri-map-pin-2-line"></i><div><span id="statDest">—</span><p>Destinations</p></div></div>
+      <div class="admin-stat-card"><i class="ri-user-line"></i><div><span id="statUsers">—</span><p>Users</p></div></div>
+      <div class="admin-stat-card"><i class="ri-route-line"></i><div><span id="statPlans">—</span><p>Travel Plans</p></div></div>
+    </div>
+
+    <!-- Destinations Table -->
+    <div class="admin-table-card">
+      <div class="admin-table-header">
+        <h2><i class="ri-map-2-line"></i> Destinations</h2>
+        <input type="search" id="destSearch" placeholder="Search destinations…" class="admin-search" oninput="filterDests(this.value)">
+      </div>
+      <div id="destsLoading" class="loading-state"><i class="ri-loader-4-line spin big-spin"></i><p>Loading…</p></div>
+      <div id="destsEmpty" class="empty-state" style="display:none"><i class="ri-map-2-line"></i><p>No destinations added yet.</p></div>
+      <div class="table-responsive" id="destsTableWrap" style="display:none">
+        <table class="admin-table" id="destsTable">
+          <thead><tr><th>Destination</th><th>Country</th><th>Category</th><th>Hotels</th><th>Rating</th><th>Actions</th></tr></thead>
+          <tbody id="destsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Add/Edit Destination Modal -->
+<div id="destModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeDestModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeDestModal()"><i class="ri-close-line"></i></button>
+    <h2 id="destModalTitle">Add Destination</h2>
+    <form id="destForm" class="admin-form">
+      <input type="hidden" id="destId">
+      <div class="form-grid-2">
+        <div class="form-group"><label>Destination Name *</label><input type="text" id="destName" required placeholder="e.g. Bali"></div>
+        <div class="form-group"><label>City *</label><input type="text" id="destCity" required placeholder="e.g. Denpasar"></div>
+        <div class="form-group"><label>Country *</label><input type="text" id="destCountry" required placeholder="e.g. Indonesia"></div>
+        <div class="form-group"><label>Category</label>
+          <select id="destCategory">
+            <option value="Beach">Beach</option><option value="Mountain">Mountain</option>
+            <option value="City">City</option><option value="Adventure">Adventure</option>
+            <option value="Luxury">Luxury</option><option value="Cultural">Cultural</option>
+            <option value="Nature">Nature</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Rating (1-5)</label><input type="number" id="destRating" min="1" max="5" step="0.1" value="4.5"></div>
+        <div class="form-group"><label>Cover Image URL</label><input type="url" id="destImage" placeholder="https://…"></div>
+        <div class="form-group"><label>Budget/day (Budget tier $)</label><input type="number" id="destBudget" placeholder="50"></div>
+        <div class="form-group"><label>Budget/day (Mid tier $)</label><input type="number" id="destMid" placeholder="120"></div>
+        <div class="form-group"><label>Budget/day (Luxury tier $)</label><input type="number" id="destLuxury" placeholder="300"></div>
+        <div class="form-group"><label>Flight Search URL</label><input type="url" id="destFlightUrl" placeholder="https://…"></div>
+      </div>
+      <div class="form-group full-width"><label>Description</label><textarea id="destDesc" rows="3" placeholder="Short description of this destination…"></textarea></div>
+      <div class="form-group full-width"><label>Tags (comma-separated)</label><input type="text" id="destTags" placeholder="beach, culture, food"></div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" onclick="closeDestModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="destSaveBtn">
+          <span id="destSaveTxt">Save Destination</span>
+          <i class="ri-loader-4-line spin" id="destSaveSpinner" style="display:none"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Hotel Modal -->
+<div id="hotelModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeHotelModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeHotelModal()"><i class="ri-close-line"></i></button>
+    <h2>Add Hotel</h2>
+    <p id="hotelDestName" style="color:var(--accent);margin-bottom:20px"></p>
+    <form id="hotelForm" class="admin-form">
+      <input type="hidden" id="hotelDestId">
+      <div class="form-grid-2">
+        <div class="form-group"><label>Hotel Name *</label><input type="text" id="hotelName" required placeholder="e.g. Grand Resort"></div>
+        <div class="form-group"><label>Stars (1-5)</label><input type="number" id="hotelStars" min="1" max="5" value="3"></div>
+        <div class="form-group"><label>Price/Night (USD) *</label><input type="number" id="hotelPrice" required placeholder="e.g. 120"></div>
+        <div class="form-group"><label>Rating (1-5)</label><input type="number" id="hotelRating" min="1" max="5" step="0.1" value="4.0"></div>
+        <div class="form-group"><label>Address</label><input type="text" id="hotelAddress" placeholder="Street, City"></div>
+        <div class="form-group"><label>Image URL</label><input type="url" id="hotelImage" placeholder="https://…"></div>
+        <div class="form-group full-width"><label>Booking URL</label><input type="url" id="hotelBookingUrl" placeholder="https://booking.com/…"></div>
+        <div class="form-group full-width"><label>Amenities (comma-separated)</label><input type="text" id="hotelAmenities" placeholder="WiFi, Pool, Spa, Restaurant"></div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" onclick="closeHotelModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Hotel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

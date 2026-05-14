@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plan Your Trip | Where Next</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
+</head>
+<body class="dark-bg">
+
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="logo">where<span>next</span></a>
+    <ul class="nav-menu" id="navMenu">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="plan.html" class="active">Plan Trip</a></li>
+      <li><a href="dashboard.html">My Trips</a></li>
+    </ul>
+    <div class="nav-right" id="navRight"></div>
+  </div>
+</nav>
+
+<main class="planner-page">
+  <!-- Hero banner -->
+  <div class="planner-hero">
+    <img src="https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1920&q=80" alt="Travel" class="planner-hero-bg">
+    <div class="planner-hero-overlay"></div>
+    <div class="planner-hero-content">
+      <p class="hero-label">AI-Powered Itinerary</p>
+      <h1>Plan Your Perfect Trip</h1>
+      <p>Tell us where, when, and how much — we'll do the rest.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Planner Form Card -->
+    <div class="planner-card" id="plannerCard">
+      <div class="planner-card-header">
+        <i class="ri-route-line"></i>
+        <h2>Where are you headed?</h2>
+        <p>Fill in your trip details and get a personalised day-by-day plan instantly.</p>
+      </div>
+
+      <form id="plannerForm" class="planner-form">
+        <div class="planner-form-grid">
+          <div class="form-group">
+            <label for="destination"><i class="ri-map-pin-2-line"></i> Destination</label>
+            <input type="text" id="destination" placeholder="e.g. Bali, Paris, Tokyo…" required list="destSuggestions">
+            <datalist id="destSuggestions">
+              <option value="Bali"><option value="Paris"><option value="Maldives"><option value="Tokyo">
+              <option value="Santorini"><option value="Swiss Alps"><option value="New York">
+              <option value="Dubai"><option value="Kerala"><option value="Goa">
+            </datalist>
+          </div>
+
+          <div class="form-group">
+            <label for="days"><i class="ri-calendar-line"></i> Number of Days</label>
+            <input type="number" id="days" min="1" max="30" placeholder="e.g. 5" required>
+          </div>
+
+          <div class="form-group">
+            <label for="budget"><i class="ri-money-dollar-circle-line"></i> Total Budget (USD)</label>
+            <input type="number" id="budget" min="100" placeholder="e.g. 2000" required>
+          </div>
+
+          <div class="form-group">
+            <label for="travelers"><i class="ri-group-line"></i> Number of Travelers</label>
+            <input type="number" id="travelers" min="1" max="20" value="1" placeholder="1">
+          </div>
+        </div>
+
+        <!-- Budget tier display -->
+        <div class="budget-tiers" id="budgetTiers" style="display:none">
+          <div class="tier-label">Detected budget category:</div>
+          <div class="tier-pills">
+            <span class="tier-pill" id="tierBudget">💰 Budget</span>
+            <span class="tier-pill" id="tierMid">✈️ Mid-range</span>
+            <span class="tier-pill" id="tierLuxury">💎 Luxury</span>
+          </div>
+        </div>
+
+        <button type="submit" class="planner-submit-btn" id="generateBtn">
+          <i class="ri-magic-line"></i>
+          <span id="generateBtnText">Generate My Travel Plan</span>
+          <i class="ri-loader-4-line spin" id="generateSpinner" style="display:none"></i>
+        </button>
+      </form>
+    </div>
+
+    <!-- Results Section -->
+    <div id="planResults" style="display:none">
+
+      <!-- Plan Overview -->
+      <div class="plan-overview" id="planOverview"></div>
+
+      <!-- Itinerary -->
+      <div class="plan-section">
+        <h2 class="plan-section-title"><i class="ri-calendar-event-line"></i> Day-by-Day Itinerary</h2>
+        <div id="itineraryContainer"></div>
+      </div>
+
+      <!-- Hotels -->
+      <div class="plan-section">
+        <h2 class="plan-section-title"><i class="ri-hotel-line"></i> Recommended Hotels</h2>
+        <div class="hotels-grid" id="hotelsContainer"></div>
+      </div>
+
+      <!-- Useful Links -->
+      <div class="plan-section">
+        <h2 class="plan-section-title"><i class="ri-links-line"></i> Useful Booking Links</h2>
+        <div class="booking-links" id="bookingLinksContainer"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="plan-actions">
+        <button onclick="document.getElementById('planResults').style.display='none'; document.getElementById('plannerCard').style.display='block'" class="btn btn-ghost">
+          <i class="ri-arrow-left-line"></i> Plan Another Trip
+        </button>
+        <a href="dashboard.html" class="btn btn-primary">
+          <i class="ri-save-line"></i> View My Saved Plans
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/api.js"></script>
+<script src="js/plan.js"></script>
+</body>
+</html>
