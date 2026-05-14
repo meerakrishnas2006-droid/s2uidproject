@@ -1,5 +1,5 @@
 // Central API helper for all frontend pages
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://s2uidproject.onrender.com/api';
 
 // ── Token helpers ──────────────────────────────────────────────────────────
 function getToken() { return localStorage.getItem('wn_token'); }
