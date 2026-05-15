@@ -40,18 +40,18 @@ document.addEventListener('DOMContentLoaded', () => {
   function goToSlide(idx) {
     videos.forEach((v, i) => v.classList.toggle('hero-video-active', i === idx));
     indicators.forEach((ind, i) => ind.classList.toggle('active', i === idx));
-    if (videos[idx]) { videos[idx].currentTime = 0; videos[idx].play().catch(() => {}); }
+    if (videos[idx]) { videos[idx].currentTime = 0; videos[idx].play().catch(() => { }); }
     currentSlide = idx;
     clearTimeout(slideTimer);
     slideTimer = setTimeout(() => goToSlide((currentSlide + 1) % videos.length), 8000);
   }
 
   window.goToSlide = goToSlide;
-  if (videos.length) { videos[0].play().catch(() => {}); slideTimer = setTimeout(() => goToSlide(1), 8000); }
+  if (videos.length) { videos[0].play().catch(() => { }); slideTimer = setTimeout(() => goToSlide(1), 8000); }
 
   // ── GSAP Animations ────────────────────────────────────────────────────
   const gsap = window.gsap;
-  const ST   = window.ScrollTrigger;
+  const ST = window.ScrollTrigger;
   if (gsap && ST) {
     gsap.registerPlugin(ST);
 
@@ -61,21 +61,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Scroll reveals
     document.querySelectorAll('[data-reveal]').forEach(el => {
-      gsap.from(el, { y: 40, opacity: 0, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 85%' } });
+      gsap.fromTo(el,
+        { y: 40, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.9, ease: 'power3.out', clearProps: 'all',
+          scrollTrigger: { trigger: el, start: 'top 92%', once: true }
+        }
+      );
     });
     document.querySelectorAll('[data-stagger]').forEach(c => {
-      gsap.from(c.children, { y: 50, opacity: 0, duration: 0.7, stagger: 0.09, ease: 'power3.out', scrollTrigger: { trigger: c, start: 'top 82%' } });
+      gsap.fromTo(Array.from(c.children),
+        { y: 50, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.7, stagger: 0.09, ease: 'power3.out', clearProps: 'all',
+          scrollTrigger: { trigger: c, start: 'top 92%', once: true }
+        }
+      );
     });
 
     // Stat counters
     document.querySelectorAll('.stat-num').forEach(el => {
       const target = parseInt(el.dataset.count) || 0;
       const suffix = el.dataset.suffix || '';
-      ST.create({ trigger: el, start: 'top 90%', once: true, onEnter: () => {
-        gsap.to({ v: 0 }, { v: target, duration: 2.2, ease: 'power2.out', onUpdate: function () {
-          el.textContent = Math.floor(this.targets()[0].v) + suffix;
-        }});
-      }});
+      ST.create({
+        trigger: el, start: 'top 90%', once: true, onEnter: () => {
+          gsap.to({ v: 0 }, {
+            v: target, duration: 2.2, ease: 'power2.out', onUpdate: function () {
+              el.textContent = Math.floor(this.targets()[0].v) + suffix;
+            }
+          });
+        }
+      });
     });
 
     // 3D tilt on dest cards
