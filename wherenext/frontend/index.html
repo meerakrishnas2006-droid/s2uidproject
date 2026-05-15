@@ -1,206 +1,571 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Where Next – Handpicked destinations, AI-crafted itineraries, and unforgettable journeys.">
+  <meta name="description"
+    content="Where Next – Handpicked destinations, AI-crafted itineraries, and unforgettable journeys.">
   <title>Where Next | Travel Planner</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+
+  <style>
+    /* ── Spiral Section ─────────────────────────────────── */
+    .spiral-section {
+      position: relative;
+      width: 100%;
+      /* Tall enough so the spiral bleeds top & bottom like the screenshot */
+      height: 100vh;
+      min-height: 640px;
+      overflow: hidden;
+      /* Pure black — exactly matching the screenshot */
+      background: #000;
+    }
+
+    /* WebGL canvas fills the whole section */
+    #webgl-container {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    #webgl-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Right-side vignette so the text column is always legible */
+    .spiral-vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      /* Fade from transparent on the left → dark on the right */
+      background: linear-gradient(to left,
+          rgba(0, 0, 0, 0.92) 0%,
+          rgba(0, 0, 0, 0.70) 30%,
+          rgba(0, 0, 0, 0.10) 55%,
+          transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Text block — RIGHT side, vertically centred */
+    .spiral-text {
+      position: absolute !important;
+      top: 50% !important;
+      right: 5% !important;
+      left: auto !important;
+      transform: translateY(-50%) !important;
+      z-index: 3;
+      max-width: 420px;
+      text-align: right !important;
+      pointer-events: none;
+    }
+
+    /* Small label — orange/red like the site's accent */
+    .spiral-text .spiral-label {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #e8472a;
+      /* matches the screenshot's orange-red */
+      margin-bottom: 1rem;
+    }
+
+    .spiral-text h2 {
+      font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+      font-weight: 900;
+      line-height: 1.05;
+      color: #fff;
+      margin: 0 0 1.2rem;
+      letter-spacing: -0.02em;
+    }
+
+    .spiral-text p {
+      font-size: 1rem;
+      line-height: 1.75;
+      color: rgba(255, 255, 255, 0.55);
+      margin: 0;
+    }
+
+    /* Mobile: text centres at the bottom */
+    @media (max-width: 768px) {
+      .spiral-text {
+        top: auto;
+        right: auto;
+        bottom: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        max-width: 88%;
+      }
+
+      .spiral-vignette {
+        background: linear-gradient(to top,
+            rgba(0, 0, 0, 0.88) 0%,
+            rgba(0, 0, 0, 0.40) 40%,
+            transparent 65%);
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- Navbar -->
-<nav class="navbar" id="navbar">
-  <div class="nav-container">
-    <a href="index.html" class="logo">where<span>next</span></a>
-    <ul class="nav-menu" id="navMenu">
-      <li><a href="index.html" class="active">Home</a></li>
-      <li><a href="explore.html">Explore</a></li>
-      <li><a href="index.html#destinations">Destinations</a></li>
-      <li><a href="index.html#gallery">Gallery</a></li>
-    </ul>
-    <div class="nav-right" id="navRight">
-      <a href="login.html" class="nav-cta">Sign In</a>
-      <button class="mobile-toggle" id="mobileToggle"><i class="ri-menu-line"></i></button>
-    </div>
-  </div>
-</nav>
-
-<!-- Hero -->
-<section class="hero" id="hero">
-  <video class="hero-video hero-video-active" id="heroVideo0" muted loop playsinline autoplay poster="https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=1920&q=80">
-    <source src="https://videos.pexels.com/video-files/1409899/1409899-uhd_2560_1440_25fps.mp4" type="video/mp4">
-  </video>
-  <video class="hero-video" id="heroVideo1" muted loop playsinline poster="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&q=80">
-    <source src="https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4" type="video/mp4">
-  </video>
-  <video class="hero-video" id="heroVideo2" muted loop playsinline poster="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=1920&q=80">
-    <source src="https://videos.pexels.com/video-files/856973/856973-hd_1920_1080_30fps.mp4" type="video/mp4">
-  </video>
-  <div class="hero-overlay"></div>
-  <div class="hero-content">
-    <p class="hero-label">Travel beyond the ordinary</p>
-    <h1>Where<em>Next?</em></h1>
-    <p class="hero-subtitle">Handpicked destinations, expert-crafted itineraries, and unforgettable moments — all in one place.</p>
-    <div class="hero-btns">
-      <a href="plan.html" class="btn btn-primary">Start Planning <i class="ri-arrow-right-line"></i></a>
-      <a href="explore.html" class="btn btn-ghost">Explore Packages</a>
-    </div>
-  </div>
-  <div class="hero-slide-indicators" id="slideIndicators">
-    <button class="slide-indicator active" onclick="goToSlide(0)" id="ind0"><span class="slide-indicator-fill"></span></button>
-    <button class="slide-indicator" onclick="goToSlide(1)" id="ind1"></button>
-    <button class="slide-indicator" onclick="goToSlide(2)" id="ind2"></button>
-  </div>
-  <div class="scroll-indicator"><span>Scroll</span><div class="scroll-line"></div></div>
-</section>
-
-<!-- Marquee -->
-<div class="marquee">
-  <div class="marquee-track">
-    <span>Bali</span><span>Santorini</span><span>Paris</span><span>Maldives</span><span>Tokyo</span><span>Iceland</span><span>Amalfi Coast</span><span>Patagonia</span><span>Swiss Alps</span><span>Kyoto</span><span>Venice</span><span>New Zealand</span>
-    <span>Bali</span><span>Santorini</span><span>Paris</span><span>Maldives</span><span>Tokyo</span><span>Iceland</span><span>Amalfi Coast</span><span>Patagonia</span><span>Swiss Alps</span><span>Kyoto</span><span>Venice</span><span>New Zealand</span>
-  </div>
-</div>
-
-<!-- Stats -->
-<section class="stats">
-  <div class="stats-grid">
-    <div data-reveal><div class="stat-num" data-count="500" data-suffix="+">0</div><div class="stat-label">Destinations</div></div>
-    <div data-reveal><div class="stat-num" data-count="12000" data-suffix="+">0</div><div class="stat-label">Happy Travelers</div></div>
-    <div data-reveal><div class="stat-num" data-count="98" data-suffix="%">0</div><div class="stat-label">Satisfaction Rate</div></div>
-    <div data-reveal><div class="stat-num" data-count="150" data-suffix="+">0</div><div class="stat-label">Tour Packages</div></div>
-  </div>
-</section>
-
-<!-- Destinations -->
-<section class="section" id="destinations">
-  <div class="container">
-    <div class="section-header" data-reveal>
-      <div class="section-label">Top Picks</div>
-      <h2 class="section-title">Stunning Destinations</h2>
-      <p class="section-subtitle">Explore our handpicked collection of the world's most awe-inspiring places.</p>
-    </div>
-    <div class="dest-grid" data-stagger>
-      <div class="dest-card"><img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&q=80" alt="Bali" loading="lazy"><div class="dest-card-overlay"></div><div class="dest-card-info"><div class="dest-card-rating"><i class="ri-star-fill"></i> 4.9</div><h3>Bali, Indonesia</h3><p>Temples, rice terraces &amp; beaches</p></div></div>
-      <div class="dest-card"><img src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=600&q=80" alt="Amalfi" loading="lazy"><div class="dest-card-overlay"></div><div class="dest-card-info"><div class="dest-card-rating"><i class="ri-star-fill"></i> 4.8</div><h3>Amalfi Coast, Italy</h3><p>Cliffside villages &amp; azure waters</p></div></div>
-      <div class="dest-card"><img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=80" alt="Paris" loading="lazy"><div class="dest-card-overlay"></div><div class="dest-card-info"><div class="dest-card-rating"><i class="ri-star-fill"></i> 4.9</div><h3>Paris, France</h3><p>Art, culture &amp; culinary delights</p></div></div>
-      <div class="dest-card"><img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&q=80" alt="Tokyo" loading="lazy"><div class="dest-card-overlay"></div><div class="dest-card-info"><div class="dest-card-rating"><i class="ri-star-fill"></i> 4.9</div><h3>Tokyo, Japan</h3><p>Tradition meets futuristic wonder</p></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- Packages -->
-<section class="section section-dark" id="packages">
-  <div class="container">
-    <div class="section-header" data-reveal>
-      <div class="section-label">Featured</div>
-      <h2 class="section-title">Popular Packages</h2>
-      <p class="section-subtitle">Hand-crafted itineraries designed for unforgettable experiences.</p>
-    </div>
-    <div class="pkg-grid" data-stagger>
-      <div class="pkg-card"><div class="pkg-card-img"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80" alt="Maldives" loading="lazy"><div class="pkg-badge">Best Seller</div></div><div class="pkg-card-body"><h3>Maldives Luxury Escape</h3><div class="pkg-meta"><span><i class="ri-time-line"></i> 5 Days</span><span><i class="ri-map-pin-line"></i> Maldives</span><span><i class="ri-star-fill"></i> 4.9</span></div><div class="pkg-price"><span class="amount">$2,499</span><span class="per">/ person</span></div><a href="plan.html" class="btn btn-primary btn-sm">Plan This Trip <i class="ri-arrow-right-s-line"></i></a></div></div>
-      <div class="pkg-card"><div class="pkg-card-img"><img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=80" alt="Alps" loading="lazy"><div class="pkg-badge">Popular</div></div><div class="pkg-card-body"><h3>Swiss Alps Adventure</h3><div class="pkg-meta"><span><i class="ri-time-line"></i> 7 Days</span><span><i class="ri-map-pin-line"></i> Switzerland</span><span><i class="ri-star-fill"></i> 4.8</span></div><div class="pkg-price"><span class="amount">$3,199</span><span class="per">/ person</span></div><a href="plan.html" class="btn btn-primary btn-sm">Plan This Trip <i class="ri-arrow-right-s-line"></i></a></div></div>
-      <div class="pkg-card"><div class="pkg-card-img"><img src="https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=600&q=80" alt="Greece" loading="lazy"><div class="pkg-badge">New</div></div><div class="pkg-card-body"><h3>Greek Islands Tour</h3><div class="pkg-meta"><span><i class="ri-time-line"></i> 6 Days</span><span><i class="ri-map-pin-line"></i> Greece</span><span><i class="ri-star-fill"></i> 4.7</span></div><div class="pkg-price"><span class="amount">$1,899</span><span class="per">/ person</span></div><a href="plan.html" class="btn btn-primary btn-sm">Plan This Trip <i class="ri-arrow-right-s-line"></i></a></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- How it works -->
-<section class="section" id="how">
-  <div class="container">
-    <div class="section-header" data-reveal>
-      <div class="section-label">Simple &amp; Fast</div>
-      <h2 class="section-title">Plan in 3 Easy Steps</h2>
-    </div>
-    <div class="steps-grid" data-stagger>
-      <div class="step-card"><div class="step-num">01</div><div class="step-icon"><i class="ri-map-pin-2-line"></i></div><h3>Choose Destination</h3><p>Enter your dream destination, travel dates, and number of travelers.</p></div>
-      <div class="step-card"><div class="step-num">02</div><div class="step-icon"><i class="ri-money-dollar-circle-line"></i></div><h3>Set Your Budget</h3><p>Tell us your total budget and we'll tailor everything to fit perfectly.</p></div>
-      <div class="step-card"><div class="step-num">03</div><div class="step-icon"><i class="ri-calendar-check-line"></i></div><h3>Get Your Plan</h3><p>Receive a complete day-by-day itinerary with hotels and booking links.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- Gallery -->
-<section class="section" id="gallery">
-  <div class="container">
-    <div class="section-header" data-reveal>
-      <div class="section-label">Moments</div>
-      <h2 class="section-title">Travel Gallery</h2>
-      <p class="section-subtitle">A glimpse into the extraordinary moments that await you.</p>
-    </div>
-    <div class="gallery-grid" data-stagger>
-      <div class="gallery-item g-tall"><img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600&q=80" alt="Valley" loading="lazy"></div>
-      <div class="gallery-item g-wide"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=80" alt="Mountains" loading="lazy"></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&q=80" alt="Forest" loading="lazy"></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1433838552652-f9a46b332c40?w=400&q=80" alt="Lake" loading="lazy"></div>
-      <div class="gallery-item g-wide"><img src="https://images.unsplash.com/photo-1488085061387-422e29b40080?w=800&q=80" alt="Balloons" loading="lazy"></div>
-      <div class="gallery-item g-tall"><img src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=600&q=80" alt="Camping" loading="lazy"></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&q=80" alt="Sunset" loading="lazy"></div>
-      <div class="gallery-item"><img src="https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=400&q=80" alt="Beach" loading="lazy"></div>
-    </div>
-  </div>
-</section>
-
-<!-- Testimonials -->
-<section class="section section-dark" id="testimonials">
-  <div class="container">
-    <div class="section-header" data-reveal>
-      <div class="section-label">Reviews</div>
-      <h2 class="section-title">What Travelers Say</h2>
-    </div>
-    <div class="swiper testimonials-swiper">
-      <div class="swiper-wrapper">
-        <div class="swiper-slide"><div class="testimonial-card"><div class="testimonial-stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i></div><p class="testimonial-text">"Our Bali trip was absolutely magical. Every detail was planned to perfection."</p><div class="testimonial-author"><img class="testimonial-avatar" src="https://i.pravatar.cc/100?img=32" alt="Sarah"><div><div class="testimonial-name">Sarah Mitchell</div><div class="testimonial-role">Bali, 2025</div></div></div></div></div>
-        <div class="swiper-slide"><div class="testimonial-card"><div class="testimonial-stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i></div><p class="testimonial-text">"The Swiss Alps package exceeded every expectation. World class service."</p><div class="testimonial-author"><img class="testimonial-avatar" src="https://i.pravatar.cc/100?img=12" alt="James"><div><div class="testimonial-name">James Rodriguez</div><div class="testimonial-role">Switzerland, 2025</div></div></div></div></div>
-        <div class="swiper-slide"><div class="testimonial-card"><div class="testimonial-stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i></div><p class="testimonial-text">"Best travel agency we've ever used. Truly 5-star service."</p><div class="testimonial-author"><img class="testimonial-avatar" src="https://i.pravatar.cc/100?img=47" alt="Priya"><div><div class="testimonial-name">Priya Sharma</div><div class="testimonial-role">Maldives, 2026</div></div></div></div></div>
-        <div class="swiper-slide"><div class="testimonial-card"><div class="testimonial-stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-half-fill"></i></div><p class="testimonial-text">"Effortless booking, gorgeous itinerary, and memories for a lifetime."</p><div class="testimonial-author"><img class="testimonial-avatar" src="https://i.pravatar.cc/100?img=68" alt="Emma"><div><div class="testimonial-name">Emma Chen</div><div class="testimonial-role">Greece, 2025</div></div></div></div></div>
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">where<span>next</span></a>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="explore.html">Explore</a></li>
+        <li><a href="index.html#destinations">Destinations</a></li>
+        <li><a href="index.html#gallery">Gallery</a></li>
+      </ul>
+      <div class="nav-right" id="navRight">
+        <a href="login.html" class="nav-cta">Sign In</a>
+        <button class="mobile-toggle" id="mobileToggle"><i class="ri-menu-line"></i></button>
       </div>
-      <div class="swiper-pagination"></div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <video class="hero-video hero-video-active" id="heroVideo0" muted loop playsinline autoplay
+      poster="https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=1920&q=80">
+      <source src="https://videos.pexels.com/video-files/1409899/1409899-uhd_2560_1440_25fps.mp4" type="video/mp4">
+    </video>
+    <video class="hero-video" id="heroVideo1" muted loop playsinline
+      poster="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&q=80">
+      <source src="https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4" type="video/mp4">
+    </video>
+    <video class="hero-video" id="heroVideo2" muted loop playsinline
+      poster="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=1920&q=80">
+      <source src="https://videos.pexels.com/video-files/856973/856973-hd_1920_1080_30fps.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-label">Travel beyond the ordinary</p>
+      <h1>Where<em>Next?</em></h1>
+      <p class="hero-subtitle">Handpicked destinations, expert-crafted itineraries, and unforgettable moments — all in
+        one place.</p>
+      <div class="hero-btns">
+        <a href="plan.html" class="btn btn-primary">Start Planning <i class="ri-arrow-right-line"></i></a>
+        <a href="explore.html" class="btn btn-ghost">Explore Packages</a>
+      </div>
+    </div>
+    <div class="hero-slide-indicators" id="slideIndicators">
+      <button class="slide-indicator active" onclick="goToSlide(0)" id="ind0"><span
+          class="slide-indicator-fill"></span></button>
+      <button class="slide-indicator" onclick="goToSlide(1)" id="ind1"></button>
+      <button class="slide-indicator" onclick="goToSlide(2)" id="ind2"></button>
+    </div>
+    <div class="scroll-indicator"><span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- Marquee -->
+  <div class="marquee">
+    <div class="marquee-track">
+      <span>Bali</span><span>Santorini</span><span>Paris</span><span>Maldives</span><span>Tokyo</span><span>Iceland</span><span>Amalfi
+        Coast</span><span>Patagonia</span><span>Swiss Alps</span><span>Kyoto</span><span>Venice</span><span>New
+        Zealand</span>
+      <span>Bali</span><span>Santorini</span><span>Paris</span><span>Maldives</span><span>Tokyo</span><span>Iceland</span><span>Amalfi
+        Coast</span><span>Patagonia</span><span>Swiss Alps</span><span>Kyoto</span><span>Venice</span><span>New
+        Zealand</span>
     </div>
   </div>
-</section>
 
-<!-- CTA -->
-<section class="section" id="cta">
-  <div class="container">
-    <div class="cta-section" data-reveal>
-      <div class="section-label">Ready?</div>
-      <h2>Start Planning Your Dream Trip</h2>
-      <p>Join 12,000+ travelers who've discovered the world with Where Next.</p>
-      <a href="plan.html" class="btn btn-primary">Get Started <i class="ri-arrow-right-line"></i></a>
+  <!-- Stats -->
+  <section class="stats">
+    <div class="stats-grid">
+      <div data-reveal>
+        <div class="stat-num" data-count="500" data-suffix="+">0</div>
+        <div class="stat-label">Destinations</div>
+      </div>
+      <div data-reveal>
+        <div class="stat-num" data-count="12000" data-suffix="+">0</div>
+        <div class="stat-label">Happy Travelers</div>
+      </div>
+      <div data-reveal>
+        <div class="stat-num" data-count="98" data-suffix="%">0</div>
+        <div class="stat-label">Satisfaction Rate</div>
+      </div>
+      <div data-reveal>
+        <div class="stat-num" data-count="150" data-suffix="+">0</div>
+        <div class="stat-label">Tour Packages</div>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Footer -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <a href="index.html" class="logo">where<span>next</span></a>
-        <p>Your trusted partner for extraordinary travel experiences around the globe.</p>
-        <div class="footer-social">
-          <a href="#"><i class="ri-instagram-line"></i></a>
-          <a href="#"><i class="ri-twitter-x-line"></i></a>
-          <a href="#"><i class="ri-facebook-fill"></i></a>
-          <a href="#"><i class="ri-youtube-line"></i></a>
+  <!-- ══════════════════════════════════════════════════════
+       SPIRAL SHOWCASE  — sits between Stats & Destinations
+  ══════════════════════════════════════════════════════ -->
+  <section class="spiral-section" id="spiral-showcase">
+    <!-- WebGL canvas — fills the whole section -->
+    <div id="webgl-container">
+      <canvas id="webgl-canvas"></canvas>
+    </div>
+
+    <!-- Right-side vignette so the text is readable -->
+    <div class="spiral-vignette"></div>
+
+    <!-- Text — RIGHT side, matching the screenshot -->
+    <div class="spiral-text">
+      <div class="spiral-label">Explore the World</div>
+      <h2>Discover Endless<br>Wonders</h2>
+      <p>Spin through breathtaking landscapes<br>— from Himalayan peaks to tropical shores.</p>
+    </div>
+  </section>
+
+  <!-- Destinations -->
+  <section class="section" id="destinations">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <div class="section-label">Top Picks</div>
+        <h2 class="section-title">Stunning Destinations</h2>
+        <p class="section-subtitle">Explore our handpicked collection of the world's most awe-inspiring places.</p>
+      </div>
+      <div class="dest-grid" data-stagger>
+        <div class="dest-card"><img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&q=80"
+            alt="Bali" loading="lazy">
+          <div class="dest-card-overlay"></div>
+          <div class="dest-card-info">
+            <div class="dest-card-rating"><i class="ri-star-fill"></i> 4.9</div>
+            <h3>Bali, Indonesia</h3>
+            <p>Temples, rice terraces &amp; beaches</p>
+          </div>
+        </div>
+        <div class="dest-card"><img src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=600&q=80"
+            alt="Amalfi" loading="lazy">
+          <div class="dest-card-overlay"></div>
+          <div class="dest-card-info">
+            <div class="dest-card-rating"><i class="ri-star-fill"></i> 4.8</div>
+            <h3>Amalfi Coast, Italy</h3>
+            <p>Cliffside villages &amp; azure waters</p>
+          </div>
+        </div>
+        <div class="dest-card"><img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=80"
+            alt="Paris" loading="lazy">
+          <div class="dest-card-overlay"></div>
+          <div class="dest-card-info">
+            <div class="dest-card-rating"><i class="ri-star-fill"></i> 4.9</div>
+            <h3>Paris, France</h3>
+            <p>Art, culture &amp; culinary delights</p>
+          </div>
+        </div>
+        <div class="dest-card"><img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&q=80"
+            alt="Tokyo" loading="lazy">
+          <div class="dest-card-overlay"></div>
+          <div class="dest-card-info">
+            <div class="dest-card-rating"><i class="ri-star-fill"></i> 4.9</div>
+            <h3>Tokyo, Japan</h3>
+            <p>Tradition meets futuristic wonder</p>
+          </div>
         </div>
       </div>
-      <div><h4>Company</h4><ul class="footer-links"><li><a href="#">About Us</a></li><li><a href="#">Careers</a></li><li><a href="#">Blog</a></li></ul></div>
-      <div><h4>Support</h4><ul class="footer-links"><li><a href="#">Help Center</a></li><li><a href="#">Contact Us</a></li><li><a href="#">Safety</a></li></ul></div>
-      <div><h4>Legal</h4><ul class="footer-links"><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li><li><a href="#">Cookies</a></li></ul></div>
     </div>
-  </div>
-  <div class="footer-bottom"><div class="container">© 2026 Where Next. All rights reserved.</div></div>
-</footer>
+  </section>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script src="js/api.js"></script>
-<script src="js/script.js"></script>
+  <!-- Packages -->
+  <section class="section section-dark" id="packages">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <div class="section-label">Featured</div>
+        <h2 class="section-title">Popular Packages</h2>
+        <p class="section-subtitle">Hand-crafted itineraries designed for unforgettable experiences.</p>
+      </div>
+      <div class="pkg-grid" data-stagger>
+        <div class="pkg-card">
+          <div class="pkg-card-img"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80"
+              alt="Maldives" loading="lazy">
+            <div class="pkg-badge">Best Seller</div>
+          </div>
+          <div class="pkg-card-body">
+            <h3>Maldives Luxury Escape</h3>
+            <div class="pkg-meta"><span><i class="ri-time-line"></i> 5 Days</span><span><i class="ri-map-pin-line"></i>
+                Maldives</span><span><i class="ri-star-fill"></i> 4.9</span></div>
+            <div class="pkg-price"><span class="amount">$2,499</span><span class="per">/ person</span></div><a
+              href="plan.html" class="btn btn-primary btn-sm">Plan This Trip <i class="ri-arrow-right-s-line"></i></a>
+          </div>
+        </div>
+        <div class="pkg-card">
+          <div class="pkg-card-img"><img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=80"
+              alt="Alps" loading="lazy">
+            <div class="pkg-badge">Popular</div>
+          </div>
+          <div class="pkg-card-body">
+            <h3>Swiss Alps Adventure</h3>
+            <div class="pkg-meta"><span><i class="ri-time-line"></i> 7 Days</span><span><i class="ri-map-pin-line"></i>
+                Switzerland</span><span><i class="ri-star-fill"></i> 4.8</span></div>
+            <div class="pkg-price"><span class="amount">$3,199</span><span class="per">/ person</span></div><a
+              href="plan.html" class="btn btn-primary btn-sm">Plan This Trip <i class="ri-arrow-right-s-line"></i></a>
+          </div>
+        </div>
+        <div class="pkg-card">
+          <div class="pkg-card-img"><img src="https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=600&q=80"
+              alt="Greece" loading="lazy">
+            <div class="pkg-badge">New</div>
+          </div>
+          <div class="pkg-card-body">
+            <h3>Greek Islands Tour</h3>
+            <div class="pkg-meta"><span><i class="ri-time-line"></i> 6 Days</span><span><i class="ri-map-pin-line"></i>
+                Greece</span><span><i class="ri-star-fill"></i> 4.7</span></div>
+            <div class="pkg-price"><span class="amount">$1,899</span><span class="per">/ person</span></div><a
+              href="plan.html" class="btn btn-primary btn-sm">Plan This Trip <i class="ri-arrow-right-s-line"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="section" id="how">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <div class="section-label">Simple &amp; Fast</div>
+        <h2 class="section-title">Plan in 3 Easy Steps</h2>
+      </div>
+      <div class="steps-grid" data-stagger>
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-icon"><i class="ri-map-pin-2-line"></i></div>
+          <h3>Choose Destination</h3>
+          <p>Enter your dream destination, travel dates, and number of travelers.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-icon"><i class="ri-money-dollar-circle-line"></i></div>
+          <h3>Set Your Budget</h3>
+          <p>Tell us your total budget and we'll tailor everything to fit perfectly.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-icon"><i class="ri-calendar-check-line"></i></div>
+          <h3>Get Your Plan</h3>
+          <p>Receive a complete day-by-day itinerary with hotels and booking links.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section class="section" id="gallery">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <div class="section-label">Moments</div>
+        <h2 class="section-title">Travel Gallery</h2>
+        <p class="section-subtitle">A glimpse into the extraordinary moments that await you.</p>
+      </div>
+      <div class="gallery-grid" data-stagger>
+        <div class="gallery-item g-tall"><img
+            src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600&q=80" alt="Valley" loading="lazy">
+        </div>
+        <div class="gallery-item g-wide"><img
+            src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=80" alt="Mountains"
+            loading="lazy"></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&q=80"
+            alt="Forest" loading="lazy"></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1433838552652-f9a46b332c40?w=400&q=80"
+            alt="Lake" loading="lazy"></div>
+        <div class="gallery-item g-wide"><img
+            src="https://images.unsplash.com/photo-1488085061387-422e29b40080?w=800&q=80" alt="Balloons" loading="lazy">
+        </div>
+        <div class="gallery-item g-tall"><img
+            src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=600&q=80" alt="Camping" loading="lazy">
+        </div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&q=80"
+            alt="Sunset" loading="lazy"></div>
+        <div class="gallery-item"><img src="https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=400&q=80"
+            alt="Beach" loading="lazy"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="section section-dark" id="testimonials">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <div class="section-label">Reviews</div>
+        <h2 class="section-title">What Travelers Say</h2>
+      </div>
+      <div class="swiper testimonials-swiper">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide">
+            <div class="testimonial-card">
+              <div class="testimonial-stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
+                  class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i></div>
+              <p class="testimonial-text">"Our Bali trip was absolutely magical. Every detail was planned to
+                perfection."</p>
+              <div class="testimonial-author"><img class="testimonial-avatar" src="https://i.pravatar.cc/100?img=32"
+                  alt="Sarah">
+                <div>
+                  <div class="testimonial-name">Sarah Mitchell</div>
+                  <div class="testimonial-role">Bali, 2025</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <div class="testimonial-card">
+              <div class="testimonial-stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
+                  class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i></div>
+              <p class="testimonial-text">"The Swiss Alps package exceeded every expectation. World class service."</p>
+              <div class="testimonial-author"><img class="testimonial-avatar" src="https://i.pravatar.cc/100?img=12"
+                  alt="James">
+                <div>
+                  <div class="testimonial-name">James Rodriguez</div>
+                  <div class="testimonial-role">Switzerland, 2025</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <div class="testimonial-card">
+              <div class="testimonial-stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
+                  class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i></div>
+              <p class="testimonial-text">"Best travel agency we've ever used. Truly 5-star service."</p>
+              <div class="testimonial-author"><img class="testimonial-avatar" src="https://i.pravatar.cc/100?img=47"
+                  alt="Priya">
+                <div>
+                  <div class="testimonial-name">Priya Sharma</div>
+                  <div class="testimonial-role">Maldives, 2026</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <div class="testimonial-card">
+              <div class="testimonial-stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i
+                  class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-half-fill"></i></div>
+              <p class="testimonial-text">"Effortless booking, gorgeous itinerary, and memories for a lifetime."</p>
+              <div class="testimonial-author"><img class="testimonial-avatar" src="https://i.pravatar.cc/100?img=68"
+                  alt="Emma">
+                <div>
+                  <div class="testimonial-name">Emma Chen</div>
+                  <div class="testimonial-role">Greece, 2025</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swiper-pagination"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section" id="cta">
+    <div class="container">
+      <div class="cta-section" data-reveal>
+        <div class="section-label">Ready?</div>
+        <h2>Start Planning Your Dream Trip</h2>
+        <p>Join 12,000+ travelers who've discovered the world with Where Next.</p>
+        <a href="plan.html" class="btn btn-primary">Get Started <i class="ri-arrow-right-line"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo">where<span>next</span></a>
+          <p>Your trusted partner for extraordinary travel experiences around the globe.</p>
+          <div class="footer-social">
+            <a href="#"><i class="ri-instagram-line"></i></a>
+            <a href="#"><i class="ri-twitter-x-line"></i></a>
+            <a href="#"><i class="ri-facebook-fill"></i></a>
+            <a href="#"><i class="ri-youtube-line"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul class="footer-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Support</h4>
+          <ul class="footer-links">
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Safety</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul class="footer-links">
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Cookies</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">© 2026 Where Next. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- Core libs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+  <!-- Three.js (required by spiral) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Site scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/script.js"></script>
+
+  <!-- Spiral script + init -->
+  <script src="js/spiral.js"></script>
+  <script>
+    // Boot the spiral as soon as Three.js and the DOM are ready.
+    // We use IntersectionObserver so the heavy WebGL work only
+    // starts when the section scrolls near the viewport.
+    (function () {
+      var spiralStarted = false;
+      var target = document.getElementById('spiral-showcase');
+      if (!target) return;
+
+      function startSpiral() {
+        if (spiralStarted) return;
+        spiralStarted = true;
+        if (typeof window.initSpiral === 'function') {
+          window.initSpiral();
+        }
+      }
+
+      // Use IntersectionObserver with a 200px root margin so it
+      // preloads slightly before the user reaches the section.
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              startSpiral();
+              io.disconnect();
+            }
+          });
+        }, { rootMargin: '200px' });
+        io.observe(target);
+      } else {
+        // Fallback: start immediately
+        startSpiral();
+      }
+    })();
+  </script>
+
 </body>
+
 </html>
